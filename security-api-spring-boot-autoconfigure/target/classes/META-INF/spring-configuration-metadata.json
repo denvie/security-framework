@@ -1,0 +1,11 @@
+{
+  "groups": [
+    {
+      "name": "security.api",
+      "type": "cn.denvie.security.api.autoconfigure.SecurityApiProperties",
+      "sourceType": "cn.denvie.security.api.autoconfigure.SecurityApiProperties"
+    }
+  ],
+  "properties": [],
+  "hints": []
+}
