@@ -1,6 +1,4 @@
-# security-gateway
-
-#### 介绍
+## 介绍
 **security-gateway**是一款基于SpringBoot的简单、安全、灵活的API网关框架，可替代传统的Controller层，提升接口开发效率。
 同时，支持请求参数的加密加签，保证接口安全。  
 * 参数加密方式支持**Base64**、**AES**、**RSA**，可通过配置文件设置
@@ -10,7 +8,7 @@
 * 支持自定义**ApiInvokeInterceptor**实现请求接口拦截  
 * 提供ApiClientService服务实现多个安全网关服务间互调操作  
 
-#### 用法
+## 用法
 (1). 创建数据库和表
 ```SQL
 CREATE DATABASE `security-gateway` CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_general_ci';
@@ -141,7 +139,7 @@ public class ToptokenApplication extends SpringBootServletInitializer {
 }
 ```
 
-#### API网关配置项（如不设置，则默认值为以下各项的值）
+## API网关配置项（如不设置，则默认值为以下各项的值）
 ```Shell
 ## 参数加密方式，目前支持：Base64、AES、RSA
 security.gateway.encryptType=AES
@@ -181,7 +179,7 @@ security.gateway.client-read-timeout=30000
 security.gateway.client-request-charset=UTF-8
 ```
 
-#### API安全网关之间互调操作说明
+## API安全网关之间互调操作说明
 在配置文件中添加**ApiClient**相关的设置  
 ```Shell
 ## Rest Client 调用的接口路径
@@ -232,7 +230,7 @@ builder.addHeader("header1", "value1")
     .addHeader("header1", "value2");
 ```
 
-#### 自定义接口调用结果**ResponseService**的实现
+## 自定义接口调用结果**ResponseService**的实现
 ```Java
 @Service
 public class ResponseServiceImpl implements ResponseService {
@@ -253,7 +251,7 @@ public class ResponseServiceImpl implements ResponseService {
 }
 ```
 
-#### 自定义签名生成规则**SignatureService**的实现
+## 自定义签名生成规则**SignatureService**的实现
 ```Java
 @Service
 public class SignatureServiceImpl implements SignatureService {
@@ -265,7 +263,7 @@ public class SignatureServiceImpl implements SignatureService {
 ```
 默认签名规则：MD5（secret + apiName + token + params + timestamp + secret）.toUpperCase()
 
-#### 自定义Sub Api签名生成规则**SubSignatureService**的实现
+## 自定义Sub Api签名生成规则**SubSignatureService**的实现
 ```Java
 @Service
 public class SubSignatureServiceImpl implements SubSignatureService {
@@ -277,7 +275,7 @@ public class SubSignatureServiceImpl implements SubSignatureService {
 ```
 默认签名规则：MD5（secret + apiName + params + secret）.toUpperCase()
 
-#### 自定义接口调用异常处理器**InvokeExceptionHandler**的实现
+## 自定义接口调用异常处理器**InvokeExceptionHandler**的实现
 ```Java
 @Service
 public class InvokeExceptionHandlerImpl implements InvokeExceptionHandler {
@@ -288,7 +286,7 @@ public class InvokeExceptionHandlerImpl implements InvokeExceptionHandler {
 }
 ```
 
-#### 自定义接口请求拦截器**ApiInvokeInterceptor**的实现
+## 自定义接口请求拦截器**ApiInvokeInterceptor**的实现
 ```Java
 public class ApiInvokeInterceptorImpl implements ApiInvokeInterceptor {
     @Override
