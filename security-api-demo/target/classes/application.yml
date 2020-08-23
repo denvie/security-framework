@@ -1,6 +1,0 @@
-server:
-  port: 8090
-
-logging:
-  level:
-    cn.denvie.security.api: debug

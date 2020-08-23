@@ -27,3 +27,9 @@
 ### VS Code ###
 .vscode/
 /security-gateway/target/
+/security-gateway-demo/target
+/security-gateway/target
+/security-common/target
+/security-api-spring-boot-autoconfigure/target
+/security-api-demo/target
+/security-api/target
