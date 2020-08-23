@@ -5,6 +5,7 @@
 package cn.denvie.security.api.autoconfigure;
 
 import cn.denvie.security.api.config.SecurityApiConfig;
+import cn.denvie.security.api.properties.SecurityApiProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

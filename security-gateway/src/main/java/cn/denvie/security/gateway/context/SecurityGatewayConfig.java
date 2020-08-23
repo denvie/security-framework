@@ -1,0 +1,221 @@
+/*
+ * Copyright © 2020-2020 尛飛俠（Denvie） All rights reserved.
+ */
+
+package cn.denvie.security.gateway.context;
+
+import cn.denvie.security.common.utils.MD5Utils;
+import cn.denvie.security.gateway.model.*;
+import cn.denvie.security.gateway.properties.SecurityGatewayProperties;
+import cn.denvie.security.gateway.service.InvokeExceptionHandler;
+import cn.denvie.security.gateway.service.ResponseService;
+import cn.denvie.security.gateway.service.SignatureService;
+import cn.denvie.security.gateway.service.SubSignatureService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * 安全网关配置。
+ *
+ * @author denvie
+ * @since 2020/8/23
+ */
+@Configuration
+@EnableConfigurationProperties(SecurityGatewayProperties.class)
+public class SecurityGatewayConfig {
+    /**
+     * 加密方式
+     */
+    public static final EncryptType ENCTYPT_TYPE = EncryptType.AES;
+
+    /**
+     * 是否启用客户端与服务端时间差校验
+     */
+    public static final boolean TIMESTAMP_CHECK_ENABLE = false;
+
+    /**
+     * 是否启用客户端设备校验
+     */
+    public static final boolean TIMESTAMP_DEVICE_ENABLE = true;
+
+    /**
+     * 允许的客户端请求时间与服务端时间差
+     */
+    public static final long TIMESTAMP_DIFFER = 10 * 60 * 1000;
+
+    /**
+     * Token的有效期（毫秒）
+     */
+    public static final long TOKEN_VAlID_TIME = 14 * 24 * 3600 * 1000;
+
+    /**
+     * 多设备登录策略
+     */
+    public static final MultiDeviceLogin MULTI_DEVICE_LOGIN = MultiDeviceLogin.REPLACE;
+
+    /**
+     * 默认的传参方式，默认为：BODY
+     */
+    public static final ParamType DEFAULT_PARAM_TYPE = ParamType.BODY;
+
+    /**
+     * 是否开启日志输出
+     */
+    public static final boolean ENABLE_LOGGING = false;
+
+    /**
+     * Sub Api 的AES私钥或者RSA公钥，默认
+     */
+    public static final String SUB_SECRET = "safe_api_gateway";
+
+    /**
+     * Rest Client 读取超时时间
+     */
+    public static int CLIENT_READ_TIMEOUT = 30000;
+
+    /**
+     * Rest Client 连接超时时间
+     */
+    public static int CLIENT_CONNECT_TIMEOUT = 8000;
+
+    /**
+     * Rest Client 请求编码
+     */
+    public static String CLIENT_REQUEST_CHARSET = "UTF-8";
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Default Service Implement
+    ///////////////////////////////////////////////////////////////////////////
+
+    @Autowired
+    SecurityGatewayProperties securityGatewayProperties;
+
+    /**
+     * ResponseService的默认实现，调用方可自定义。
+     */
+    @Bean
+    @ConditionalOnMissingBean(ResponseService.class)
+    public ResponseService responseService() {
+
+        return new ResponseService() {
+            @Override
+            public ApiResponse success(Object data) {
+                return build(ApiCode.SUCCESS, data);
+            }
+
+            @Override
+            public ApiResponse success(String code, String message, Object data) {
+                return build(code, message, data);
+            }
+
+            @Override
+            public ApiResponse error(String code, String message, Object data) {
+                return build(code, message, data);
+            }
+
+            private ApiResponse build(ApiCode apiCode, Object data) {
+                return build(apiCode.code(), apiCode.message(), data);
+            }
+
+            private ApiResponse build(String code, String message, Object data) {
+                DefaultApiResponse<Object> response = new DefaultApiResponse<>();
+                response.setCode(code);
+                response.setMessage(message);
+                response.setData(data);
+                return response;
+            }
+        };
+    }
+
+    /**
+     * SignatureService的默认实现，调用方可自定义。
+     */
+    @Bean
+    @ConditionalOnMissingBean(SignatureService.class)
+    public SignatureService signatureService() {
+
+        return new SignatureService() {
+            @Override
+            public String sign(ApiRequest param) {
+                String apiName = param.getApiName();
+                String accessToken = param.getAccessToken();
+                String secret = param.getSecret();
+                String params = param.getParams();
+                String timestamp = param.getTimestamp();
+                StringBuilder keyBuilder = new StringBuilder();
+                keyBuilder.append(secret)
+                        .append(apiName)
+                        .append(params)
+                        .append(accessToken)
+                        .append(timestamp)
+                        .append(secret);
+                return MD5Utils.md5(keyBuilder.toString()).toUpperCase();
+            }
+        };
+    }
+
+    /**
+     * SubSignatureService的默认实现，调用方可自定义。
+     */
+    @Bean
+    @ConditionalOnMissingBean(SubSignatureService.class)
+    public SubSignatureService subSignatureService() {
+
+        return new SubSignatureService() {
+            @Override
+            public String sign(ApiRequest param) {
+                String secret = param.getSecret();
+                StringBuilder keyBuilder = new StringBuilder();
+                keyBuilder.append(secret)
+                        .append(param.getApiName())
+                        .append(param.getParams())
+                        .append(param.getTimestamp())
+                        .append(secret);
+                return MD5Utils.md5(keyBuilder.toString()).toUpperCase();
+            }
+        };
+    }
+
+    /**
+     * API调用异常处理的默认实现，调用方可自定义。
+     */
+    @Bean
+    @ConditionalOnMissingBean(InvokeExceptionHandler.class)
+    public InvokeExceptionHandler invokExceptionHandler(ResponseService responseService) {
+
+        return new InvokeExceptionHandler() {
+            @Override
+            public ApiResponse handle(ApiRequest apiRequest, Throwable e) {
+                String errMsg = e == null ?
+                        ApiCode.FAILURE.message() : e.getMessage();
+                return responseService.error(ApiCode.FAILURE.code(), errMsg, null);
+            }
+        };
+    }
+
+    /**
+     * 默认的API接口请求拦截器。
+     */
+    @Bean
+    @ConditionalOnMissingBean(ApiInvokeInterceptor.class)
+    public ApiInvokeInterceptor apiInvokeInterceptor() {
+
+        return new ApiInvokeInterceptor() {
+            @Override
+            public InvokeCode before(ApiRequest request, Object[] args) {
+                return null;
+            }
+
+            @Override
+            public void error(ApiRequest request, Throwable t) {
+            }
+
+            @Override
+            public void after(ApiRequest request, Object result) {
+            }
+        };
+    }
+}

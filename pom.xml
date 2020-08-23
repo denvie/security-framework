@@ -29,9 +29,12 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <guava.version>28.2-jre</guava.version>
+        <commons-beanutils.version>1.9.4</commons-beanutils.version>
     </properties>
 
     <modules>
+        <module>security-common</module>
         <module>security-api</module>
         <module>security-api-spring-boot-autoconfigure</module>
         <module>security-api-spring-boot-starter</module>

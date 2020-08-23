@@ -2,8 +2,9 @@
  * Copyright © 2020-2020 尛飛俠（Denvie） All rights reserved.
  */
 
-package cn.denvie.security.api.annotation;
+package cn.denvie.security.api.context;
 
+import cn.denvie.security.common.annotation.SecurityApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;

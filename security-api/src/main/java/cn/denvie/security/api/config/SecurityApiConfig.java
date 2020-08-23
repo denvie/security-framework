@@ -4,7 +4,7 @@
 
 package cn.denvie.security.api.config;
 
-import cn.denvie.security.api.annotation.SecurityApiMethodArgumentResolver;
+import cn.denvie.security.api.context.SecurityApiMethodArgumentResolver;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
